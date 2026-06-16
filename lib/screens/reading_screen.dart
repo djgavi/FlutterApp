@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/sample_texts.dart';
 
@@ -9,7 +10,50 @@ class ReadingScreen extends StatefulWidget {
 }
 
 class _ReadingScreenState extends State<ReadingScreen> {
+  static const Duration _duracionLectura = Duration(seconds: 60);
+
   late final String _textoOriginal = obtenerTextoAleatorio();
+
+  Timer? _temporizador;
+  int _segundosRestantes = _duracionLectura.inSeconds;
+  bool _finalizado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _iniciarCuentaAtras();
+  }
+
+  void _iniciarCuentaAtras() {
+    _temporizador = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_segundosRestantes <= 1) {
+          _segundosRestantes = 0;
+          _finalizado = true;
+          timer.cancel();
+          _alFinalizarTiempo();
+        } else {
+          _segundosRestantes--;
+        }
+      });
+    });
+  }
+
+  void _alFinalizarTiempo() {
+    // Aquí se generarán las estadísticas en una próxima implementación.
+  }
+
+  @override
+  void dispose() {
+    _temporizador?.cancel();
+    super.dispose();
+  }
+
+  String get _tiempoFormateado {
+    final minutos = (_segundosRestantes ~/ 60).toString().padLeft(2, '0');
+    final segundos = (_segundosRestantes % 60).toString().padLeft(2, '0');
+    return '$minutos:$segundos';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +64,22 @@ class _ReadingScreenState extends State<ReadingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Lee el siguiente texto en voz alta:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Lee el siguiente texto en voz alta:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  _tiempoFormateado,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -33,6 +90,14 @@ class _ReadingScreenState extends State<ReadingScreen> {
                 ),
               ),
             ),
+            if (_finalizado)
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(
+                  '¡Tiempo terminado!',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
           ],
         ),
       ),
