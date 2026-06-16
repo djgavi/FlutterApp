@@ -13,14 +13,20 @@ class ReadingScreen extends StatefulWidget {
 }
 
 class _ReadingScreenState extends State<ReadingScreen> {
-  static const Duration _duracionLectura = Duration(seconds: 60);
+  /// Duración total del ejercicio de lectura.
+  static const Duration duracionLectura = Duration(seconds: 20);
+
+  /// Tiempo sin reconocer voz nueva tras el cual se da por terminada la lectura.
+  static const Duration duracionSilencio = Duration(seconds: 5);
 
   late final String _textoOriginal = obtenerTextoAleatorio();
   final TranscriptionService _transcripcion = TranscriptionService();
 
   Timer? _temporizador;
-  int _segundosRestantes = _duracionLectura.inSeconds;
+  Timer? _temporizadorSilencio;
+  int _segundosRestantes = duracionLectura.inSeconds;
   String _textoTranscrito = '';
+  bool _finalizando = false;
 
   @override
   void initState() {
@@ -32,13 +38,20 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Future<void> _iniciarTranscripcion() async {
     final disponible = await _transcripcion.inicializar();
     if (!disponible || !mounted) return;
+    _reiniciarTemporizadorSilencio();
     await _transcripcion.empezarAEscuchar(
       textoApoyo: _textoOriginal,
       onResultado: (transcripcionParcial) {
         if (!mounted) return;
         setState(() => _textoTranscrito = transcripcionParcial);
+        _reiniciarTemporizadorSilencio();
       },
     );
+  }
+
+  void _reiniciarTemporizadorSilencio() {
+    _temporizadorSilencio?.cancel();
+    _temporizadorSilencio = Timer(duracionSilencio, _alFinalizarTiempo);
   }
 
   void _iniciarCuentaAtras() {
@@ -56,6 +69,10 @@ class _ReadingScreenState extends State<ReadingScreen> {
   }
 
   void _alFinalizarTiempo() {
+    if (_finalizando || !mounted) return;
+    _finalizando = true;
+    _temporizador?.cancel();
+    _temporizadorSilencio?.cancel();
     _transcripcion.detener();
     final estadisticas = TextComparator.comparar(_textoOriginal, _textoTranscrito);
     Navigator.of(context).pushReplacement(
@@ -66,6 +83,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   void dispose() {
     _temporizador?.cancel();
+    _temporizadorSilencio?.cancel();
     _transcripcion.liberar();
     super.dispose();
   }
