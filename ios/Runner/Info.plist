@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Esta app necesita el micrófono para escuchar tu lectura en voz alta.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Esta app usa el reconocimiento de voz para transcribir tu lectura.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
