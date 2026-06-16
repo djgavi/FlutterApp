@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/sample_texts.dart';
+import '../services/text_comparator.dart';
 import '../services/transcription_service.dart';
+import 'stats_screen.dart';
 
 class ReadingScreen extends StatefulWidget {
   const ReadingScreen({super.key});
@@ -18,7 +20,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   Timer? _temporizador;
   int _segundosRestantes = _duracionLectura.inSeconds;
-  bool _finalizado = false;
   String _textoTranscrito = '';
 
   @override
@@ -45,7 +46,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
       setState(() {
         if (_segundosRestantes <= 1) {
           _segundosRestantes = 0;
-          _finalizado = true;
           timer.cancel();
           _alFinalizarTiempo();
         } else {
@@ -57,7 +57,10 @@ class _ReadingScreenState extends State<ReadingScreen> {
 
   void _alFinalizarTiempo() {
     _transcripcion.detener();
-    // Aquí se generarán las estadísticas en una próxima implementación.
+    final estadisticas = TextComparator.comparar(_textoOriginal, _textoTranscrito);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => StatsScreen(stats: estadisticas)),
+    );
   }
 
   @override
@@ -117,14 +120,6 @@ class _ReadingScreenState extends State<ReadingScreen> {
               _textoTranscrito.isEmpty ? '...' : _textoTranscrito,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            if (_finalizado)
-              const Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  '¡Tiempo terminado!',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
           ],
         ),
       ),
