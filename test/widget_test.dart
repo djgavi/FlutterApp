@@ -4,22 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_app/main.dart';
 
 void main() {
-  testWidgets('Saludo cambia al pulsar el botón', (WidgetTester tester) async {
+  testWidgets('La pantalla de inicio saluda y muestra el botón Empezar',
+      (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    expect(find.text('Pulsa aquí para saludarte'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Saludar'), findsOneWidget);
+    final saludoEncontrado = find.textContaining('Buenos días').evaluate().isNotEmpty ||
+        find.textContaining('Buenas tardes').evaluate().isNotEmpty ||
+        find.textContaining('Buenas noches').evaluate().isNotEmpty;
 
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(find.text('Pulsa aquí para saludarte'), findsNothing);
-    expect(find.widgetWithText(ElevatedButton, 'Volver'), findsOneWidget);
-
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-
-    expect(find.text('Pulsa aquí para saludarte'), findsOneWidget);
-    expect(find.widgetWithText(ElevatedButton, 'Saludar'), findsOneWidget);
+    expect(saludoEncontrado, isTrue);
+    expect(find.widgetWithText(ElevatedButton, 'Empezar'), findsOneWidget);
   });
 }
