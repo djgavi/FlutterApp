@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../data/sample_texts.dart';
+import '../services/transcription_service.dart';
 
 class ReadingScreen extends StatefulWidget {
   const ReadingScreen({super.key});
@@ -13,15 +14,30 @@ class _ReadingScreenState extends State<ReadingScreen> {
   static const Duration _duracionLectura = Duration(seconds: 60);
 
   late final String _textoOriginal = obtenerTextoAleatorio();
+  final TranscriptionService _transcripcion = TranscriptionService();
 
   Timer? _temporizador;
   int _segundosRestantes = _duracionLectura.inSeconds;
   bool _finalizado = false;
+  String _textoTranscrito = '';
 
   @override
   void initState() {
     super.initState();
     _iniciarCuentaAtras();
+    _iniciarTranscripcion();
+  }
+
+  Future<void> _iniciarTranscripcion() async {
+    final disponible = await _transcripcion.inicializar();
+    if (!disponible || !mounted) return;
+    await _transcripcion.empezarAEscuchar(
+      textoApoyo: _textoOriginal,
+      onResultado: (transcripcionParcial) {
+        if (!mounted) return;
+        setState(() => _textoTranscrito = transcripcionParcial);
+      },
+    );
   }
 
   void _iniciarCuentaAtras() {
@@ -40,12 +56,14 @@ class _ReadingScreenState extends State<ReadingScreen> {
   }
 
   void _alFinalizarTiempo() {
+    _transcripcion.detener();
     // Aquí se generarán las estadísticas en una próxima implementación.
   }
 
   @override
   void dispose() {
     _temporizador?.cancel();
+    _transcripcion.liberar();
     super.dispose();
   }
 
@@ -89,6 +107,15 @@ class _ReadingScreenState extends State<ReadingScreen> {
                   style: const TextStyle(fontSize: 20, height: 1.4),
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Transcripción en directo:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              _textoTranscrito.isEmpty ? '...' : _textoTranscrito,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             if (_finalizado)
               const Padding(
