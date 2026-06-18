@@ -1,3 +1,4 @@
+import '../models/palabra_comparada.dart';
 import '../models/reading_stats.dart';
 
 /// Compara el texto original con la transcripción de la lectura y genera
@@ -12,6 +13,14 @@ class TextComparator {
         .toList();
   }
 
+  static Map<String, int> _contarPalabras(List<String> palabras) {
+    final mapa = <String, int>{};
+    for (final p in palabras) {
+      mapa[p] = (mapa[p] ?? 0) + 1;
+    }
+    return mapa;
+  }
+
   static ReadingStats comparar(String textoOriginal, String transcripcion) {
     final palabrasOriginales = _extraerPalabras(textoOriginal);
     final palabrasTranscritas = _extraerPalabras(transcripcion);
@@ -21,10 +30,7 @@ class TextComparator {
       (suma, palabra) => suma + palabra.length,
     );
 
-    final disponibles = <String, int>{};
-    for (final palabra in palabrasOriginales) {
-      disponibles[palabra] = (disponibles[palabra] ?? 0) + 1;
-    }
+    final disponibles = _contarPalabras(palabrasOriginales);
 
     var coincidentes = 0;
     for (final palabra in palabrasTranscritas) {
@@ -47,5 +53,24 @@ class TextComparator {
       inventedWords: inventadas,
       similarityPercentage: parecido.toDouble(),
     );
+  }
+
+  /// Devuelve cada token visible de la transcripción anotado con si coincide
+  /// o no con alguna palabra del texto original. Preserva el texto original
+  /// de cada token (incluyendo signos de puntuación) para la visualización.
+  static List<PalabraComparada> comparacionDetallada(
+    String textoOriginal,
+    String transcripcion,
+  ) {
+    final disponibles = _contarPalabras(_extraerPalabras(textoOriginal));
+    final tokens = transcripcion.split(RegExp(r'\s+')).where((t) => t.isNotEmpty);
+
+    return tokens.map((token) {
+      final normalizada = _patronPalabra.stringMatch(token.toLowerCase()) ?? '';
+      final restantes = disponibles[normalizada] ?? 0;
+      final coincide = normalizada.isNotEmpty && restantes > 0;
+      if (coincide) disponibles[normalizada] = restantes - 1;
+      return PalabraComparada(texto: token, coincide: coincide);
+    }).toList();
   }
 }

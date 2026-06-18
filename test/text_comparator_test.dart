@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_app/services/text_comparator.dart';
+import 'package:flutter_app/models/palabra_comparada.dart';
 
 void main() {
   test('detecta palabras coincidentes e inventadas', () {
@@ -20,5 +21,19 @@ void main() {
     expect(stats.wordCount, 0);
     expect(stats.matchingWords, 0);
     expect(stats.similarityPercentage, 0);
+  });
+
+  test('comparacionDetallada marca en rojo solo las palabras no coincidentes', () {
+    const original = 'El sol brilla en el cielo azul';
+    const transcripcion = 'El sol brilla en el cielo morado';
+
+    final resultado = TextComparator.comparacionDetallada(original, transcripcion);
+
+    expect(resultado.length, 7);
+    final coincidentes = resultado.where((p) => p.coincide).toList();
+    final noCoincidentes = resultado.where((p) => !p.coincide).toList();
+    expect(coincidentes.length, 6);
+    expect(noCoincidentes.length, 1);
+    expect(noCoincidentes.first.texto, 'morado');
   });
 }
