@@ -30,6 +30,9 @@ class TranscriptionService {
         listenMode: ListenMode.dictation,
         localeId: 'es_ES',
         listenFor: duracion,
+        // pauseFor igual a listenFor evita que el timeout de silencio
+        // nativo de Android corte la escucha al hacer una pausa.
+        pauseFor: duracion,
       ),
     );
   }
