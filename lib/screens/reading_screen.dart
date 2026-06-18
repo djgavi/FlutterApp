@@ -73,18 +73,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lee que te cuento'),
-        actions: [
-          TextButton(
-            onPressed: _finalizar,
-            child: const Text(
-              'Finalizar',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Lee que te cuento')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -111,6 +100,18 @@ class _ReadingScreenState extends State<ReadingScreen> {
             Text(
               _textoTranscrito.isEmpty ? '...' : _textoTranscrito,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _finalizar,
+                icon: const Icon(Icons.stop_circle_outlined),
+                label: const Text(
+                  'Finalizar lectura',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
             ),
           ],
         ),
