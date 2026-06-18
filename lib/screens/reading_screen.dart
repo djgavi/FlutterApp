@@ -76,7 +76,13 @@ class _ReadingScreenState extends State<ReadingScreen> {
     _transcripcion.detener();
     final estadisticas = TextComparator.comparar(_textoOriginal, _textoTranscrito);
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => StatsScreen(stats: estadisticas)),
+      MaterialPageRoute(
+        builder: (_) => StatsScreen(
+          stats: estadisticas,
+          textoOriginal: _textoOriginal,
+          textoTranscrito: _textoTranscrito,
+        ),
+      ),
     );
   }
 
