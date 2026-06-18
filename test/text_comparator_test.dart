@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_app/services/text_comparator.dart';
-import 'package:flutter_app/models/palabra_comparada.dart';
 
 void main() {
   test('detecta palabras coincidentes e inventadas', () {
