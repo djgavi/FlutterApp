@@ -34,7 +34,7 @@ class _ReadingScreenState extends State<ReadingScreen> {
     final disponible = await _transcripcion.inicializar();
     if (!disponible || !mounted) return;
     await _transcripcion.empezarAEscuchar(
-      textoApoyo: _textoOriginal,
+      duracion: duracionLectura,
       onResultado: (transcripcionParcial) {
         if (!mounted) return;
         setState(() => _textoTranscrito = transcripcionParcial);
