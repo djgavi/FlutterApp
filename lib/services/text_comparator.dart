@@ -21,7 +21,11 @@ class TextComparator {
     return mapa;
   }
 
-  static ReadingStats comparar(String textoOriginal, String transcripcion) {
+  static ReadingStats comparar(
+    String textoOriginal,
+    String transcripcion,
+    Duration tiempoEmpleado,
+  ) {
     final palabrasOriginales = _extraerPalabras(textoOriginal);
     final palabrasTranscritas = _extraerPalabras(transcripcion);
 
@@ -41,6 +45,7 @@ class TextComparator {
       }
     }
     final inventadas = palabrasTranscritas.length - coincidentes;
+    final noLeidas = palabrasOriginales.length - coincidentes;
 
     final parecido = palabrasOriginales.isEmpty
         ? 0.0
@@ -51,7 +56,9 @@ class TextComparator {
       letterCount: letrasLeidas,
       matchingWords: coincidentes,
       inventedWords: inventadas,
+      unreadWords: noLeidas,
       similarityPercentage: parecido.toDouble(),
+      elapsedTime: tiempoEmpleado,
     );
   }
 

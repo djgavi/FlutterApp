@@ -22,10 +22,12 @@ class _ReadingScreenState extends State<ReadingScreen> {
   Timer? _temporizador;
   String _textoTranscrito = '';
   bool _finalizando = false;
+  late final DateTime _inicio;
 
   @override
   void initState() {
     super.initState();
+    _inicio = DateTime.now();
     _iniciarCuentaAtras();
     _iniciarTranscripcion();
   }
@@ -51,7 +53,8 @@ class _ReadingScreenState extends State<ReadingScreen> {
     _finalizando = true;
     _temporizador?.cancel();
     _transcripcion.detener();
-    final estadisticas = TextComparator.comparar(_textoOriginal, _textoTranscrito);
+    final tiempoEmpleado = DateTime.now().difference(_inicio);
+    final estadisticas = TextComparator.comparar(_textoOriginal, _textoTranscrito, tiempoEmpleado);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => StatsScreen(
