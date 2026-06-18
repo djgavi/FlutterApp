@@ -48,10 +48,12 @@ class _VistaVertical extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Estadistica(etiqueta: 'Palabras leídas',       valor: '${stats.wordCount}'),
-          _Estadistica(etiqueta: 'Letras leídas',         valor: '${stats.letterCount}'),
-          _Estadistica(etiqueta: 'Palabras coincidentes', valor: '${stats.matchingWords}'),
-          _Estadistica(etiqueta: 'Palabras inventadas',   valor: '${stats.inventedWords}'),
+          _Estadistica(etiqueta: 'Tiempo empleado',        valor: _formatearTiempo(stats.elapsedTime)),
+          _Estadistica(etiqueta: 'Palabras leídas',        valor: '${stats.wordCount}'),
+          _Estadistica(etiqueta: 'Letras leídas',          valor: '${stats.letterCount}'),
+          _Estadistica(etiqueta: 'Palabras coincidentes',  valor: '${stats.matchingWords}'),
+          _Estadistica(etiqueta: 'Palabras inventadas',    valor: '${stats.inventedWords}'),
+          _Estadistica(etiqueta: 'Palabras no leídas',     valor: '${stats.unreadWords}'),
           _Estadistica(
             etiqueta: 'Porcentaje de parecido',
             valor: '${stats.similarityPercentage.toStringAsFixed(1)} %',
@@ -155,9 +157,11 @@ class _VistaHorizontal extends StatelessWidget {
                 ),
                 const Divider(),
                 Text(
+                  '${_formatearTiempo(stats.elapsedTime)}  •  '
                   'Parecido: ${stats.similarityPercentage.toStringAsFixed(1)} %  •  '
                   '${stats.matchingWords} correctas  •  '
-                  '${stats.inventedWords} inventadas',
+                  '${stats.inventedWords} inventadas  •  '
+                  '${stats.unreadWords} no leídas',
                   style: const TextStyle(fontSize: 12),
                 ),
               ],
@@ -167,6 +171,16 @@ class _VistaHorizontal extends StatelessWidget {
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+String _formatearTiempo(Duration d) {
+  final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+  return '$m:$s';
 }
 
 // ---------------------------------------------------------------------------
