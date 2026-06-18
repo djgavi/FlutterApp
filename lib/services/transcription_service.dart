@@ -3,32 +3,37 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 /// Encapsula el reconocimiento de voz continuo usado durante la lectura.
 /// Cuando el motor se detiene por silencio, se reinicia automáticamente
-/// hasta que se llame a [detener].
+/// tras un breve retardo, hasta que se llame a [detener].
 class TranscriptionService {
   final SpeechToText _speech = SpeechToText();
   bool _disponible = false;
   bool _activo = false;
+  bool _reiniciando = false;
 
   void Function(String)? _onResultado;
 
-  /// Pide permiso de micrófono e inicializa el motor de reconocimiento de voz.
-  /// Registra el callback de estado para relanzar la escucha automáticamente.
   Future<bool> inicializar() async {
     final permiso = await Permission.microphone.request();
     if (!permiso.isGranted) return false;
 
     _disponible = await _speech.initialize(
       onStatus: (status) {
-        // Cuando el motor para por silencio o timeout, reiniciamos si seguimos activos.
-        if (_activo && (status == 'done' || status == 'notListening')) {
-          _escuchar();
+        // Evitamos relanzar si ya hay un reinicio pendiente o si estamos activos.
+        if (!_activo || _reiniciando) return;
+        if (status == 'done' || status == 'notListening') {
+          _reiniciando = true;
+          // Pequeño retardo para que el motor libere el micrófono completamente
+          // antes de volver a abrirlo.
+          Future.delayed(const Duration(milliseconds: 400), () {
+            _reiniciando = false;
+            if (_activo) _escuchar();
+          });
         }
       },
     );
     return _disponible;
   }
 
-  /// Inicia la escucha continua. [textoApoyo] se usa como pista de contexto.
   Future<void> empezarAEscuchar({
     required void Function(String transcripcionParcial) onResultado,
     String? textoApoyo,
@@ -53,13 +58,13 @@ class TranscriptionService {
 
   Future<void> detener() async {
     _activo = false;
-    if (_speech.isListening) {
-      await _speech.stop();
-    }
+    _reiniciando = false;
+    if (_speech.isListening) await _speech.stop();
   }
 
   void liberar() {
     _activo = false;
+    _reiniciando = false;
     _speech.cancel();
   }
 }
